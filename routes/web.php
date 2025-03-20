@@ -16,7 +16,9 @@ use App\Http\Controllers\User\Dashboard;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
+Route::get('/',function(){
+    return view('welcome');
+});
 
 Route::middleware('guest')->controller(AuthManager::class)->group(function () {
     Route::get('/login', 'login')->name('loginPage');

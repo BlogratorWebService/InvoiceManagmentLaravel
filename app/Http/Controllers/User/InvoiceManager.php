@@ -24,7 +24,7 @@ class InvoiceManager extends Controller
         $data['invoices'] = Invoice::where('userId', auth()->user()->id)
             ->with('customer') // Eager load the customer relationship
             ->latest()
-            ->get();
+            ->paginate(15);
         return view('user.invoices.index', $data);
     }
     public function create(Request $request)
@@ -37,7 +37,6 @@ class InvoiceManager extends Controller
 
         $lstInvNum = Invoice::where([
             'userId' => $request->user()->id,
-
         ])->whereDate('created_at', date('Y-m-d'))->latest()->first();
         if ($lstInvNum) {
 
@@ -104,11 +103,11 @@ class InvoiceManager extends Controller
             $invoice->invoiceDate = $request->invoiceDate;
             //  $invoice->dueDate = $request->dueDate;
             $invoice->totalAmount = 0;
-          
+
             $invoice->grandTotal = 0;
             $invoice->discount    = 0;
             $invoice->cGst = $request->cGst;
-            $invoice->SGst = $request->sGst;
+            $invoice->sGst = $request->sGst;
             $invoice->iGst = $request->iGst;
             $invoice->status = $request->status;
             $invoice->save();
@@ -150,8 +149,12 @@ class InvoiceManager extends Controller
 
             // Total tax amount
             $taxAmount = $cGstAmount + $sGstAmount + $iGstAmount;
+
+
             // Calculate grand total
             $invoice->grandTotal = $invoice->totalAmount - $invoice->discount + $taxAmount;
+
+
             // Save the invoice
             $invoice->save();
             DB::commit();

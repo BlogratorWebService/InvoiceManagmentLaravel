@@ -77,8 +77,8 @@
                     <div class="col-md-auto me-auto px-3 pe-md-0 mt-0 d-flex align-items-center">
 
                         <div class="btn-group mb-3 mb-md-0">
-                            <button class="btn btn-primary" onclick="window.location.href='{{ route('invoice.create') }}'" tabindex="0" aria-controls="DataTables_Table_0"
-                                type="button">
+                            <button class="btn btn-primary" onclick="window.location.href='{{ route('invoice.create') }}'"
+                                tabindex="0" aria-controls="DataTables_Table_0" type="button">
                                 <i class="icon-base icon-16px bx bx-plus me-md-2"></i>
                                 <span class="d-md-inline-block d-none">Create Invoice</span>
                             </button>
@@ -129,7 +129,7 @@
                                 </td>
                                 <td>₹{{ number_format($invoice->grandTotal, 2) }}</td>
                                 <td>{{ $invoice->invoiceDate }}</td>
-                                <td>₹{{ number_format($invoice->balance, 2)??0 }}</td>
+                                <td>₹{{ number_format($invoice->balance, 2) ?? 0 }}</td>
                                 <td>
                                     @if ($invoice->status === 'Paid')
                                         <span class="badge bg-success">Paid</span>
@@ -154,9 +154,11 @@
                                             <i class="icon-base bx bx-dots-horizontal-rounded"></i>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-end">
-                                            <a class="dropdown-item" href="{{ route('invoice.show', $invoice->id) }}">View</a>
-                                            <a class="dropdown-item" href="{{ route('invoice.edit', $invoice->id) }}">Edit</a>
-                                          
+                                            <a class="dropdown-item"
+                                                href="{{ route('invoice.show', $invoice->id) }}">View</a>
+                                            <a class="dropdown-item"
+                                                href="{{ route('invoice.edit', $invoice->id) }}">Edit</a>
+
                                         </div>
                                     </div>
                                 </td>
@@ -164,7 +166,17 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div class="d-flex justify-content-between align-items-center mt-3 container">
+                    <div>
+                        Showing {{ $invoices->firstItem() }} to {{ $invoices->lastItem() }} of {{ $invoices->total() }}
+                        entries
+                    </div>
+                    <div>
+                        {{ $invoices->links('pagination::bootstrap-5') }}
+                    </div>
+                </div>
             </div>
+            
         </div>
 
     </div>

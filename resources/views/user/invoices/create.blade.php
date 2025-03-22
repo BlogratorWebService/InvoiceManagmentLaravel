@@ -13,7 +13,7 @@
 
                     </div>
                 @endif
-                <form method="POST" action="{{ route('invoice.store') }}">
+                <form method="POST" action="{{ route('invoice.store') }}" id="invoiceForm">
                     @csrf
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
@@ -166,7 +166,7 @@
                         </div>
 
                         <div class="text-end mt-4">
-                            <button type="submit" class="btn btn-success">Save Invoice</button>
+                            <button type="submit" class="btn btn-success" id="saveInvoiceButton">Save Invoice</button>
                         </div>
                 </form>
             </div>
@@ -183,6 +183,23 @@
 
     <script>
         $(document).ready(function() {
+            invoiceForm = document.getElementById('invoiceForm');
+            invoiceForm.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent default form submission
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Are You Sure You Want To Save This Invoice?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, Save it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        invoiceForm.submit(); // Submit the form if confirmed
+                    }
+                });
+            });
             $('.select2').select2({
                 width: '100%', // Ensure full width
                 theme: 'bootstrap-5', // Use Bootstrap 5 theme (if applicable)

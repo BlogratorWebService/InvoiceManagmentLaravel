@@ -14,6 +14,23 @@ class InvoiceManager extends Controller
     }
     public function create(Request $request)
     {
+        $entPriceName = auth()->user()->enterPriceName;
+        $entPriceName = str_replace(' ', '', $entPriceName);
+        $entPriceName = strtoupper($entPriceName);
+        $lstInvNum = Invoice::where([
+            'userId'=>$request->auth()->id,
+            'created_at'=>now()->format('Y-m-d')
+            ])->latest()->first();
+        if($lstInvNum){
+            $lstInvNum = $lstInvNum->invoiceNumber;
+            $lstInvNum = explode('-',$lstInvNum);
+            $lstInvNum = $lstInvNum[1];
+            $lstInvNum = (int)$lstInvNum + 1;
+            $lstInvNum = str_pad($lstInvNum,4,'0',STR_PAD_LEFT);
+            $data['invoiceNumber'] = substr($entPriceName,0,1).'-'.date('Ymd').($lstInvNum+1);
+        }
+        $data['invoiceNumber'] = substr($entPriceName,0,1).'-'.date('Ymd').'0001';
+
         return view('user.invoices.create');
     }
     public function store(Request $request)
@@ -21,7 +38,7 @@ class InvoiceManager extends Controller
         //validate the request
         $request->validate([
             'customer' => 'required|exists:customers,id',
-            'invoiceNumber' => 'required|min:1',
+            'invoiceNumber' => 'required|min:1|unique:invoices,invoiceNumber',
             'invoiceDate' => 'required',
             'dueDate' => 'required',
             'status' => 'required|in:paid,unpaid',

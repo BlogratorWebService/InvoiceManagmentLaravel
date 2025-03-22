@@ -45,7 +45,7 @@ class AuthManager extends Controller
             'firstName' => 'required|string|max:40',
             'lastName' => 'required|string|max:40',
             'phoneNumber' => 'required|numeric|digits:10',
-            'panNumber' => ['required', 'regex:/^[A-Z0-9]{10}$/'],
+            'panNumber' => ['required', 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]$/'],
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);

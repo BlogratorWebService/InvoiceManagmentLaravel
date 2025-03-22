@@ -104,7 +104,7 @@ class InvoiceManager extends Controller
             $invoice->invoiceDate = $request->invoiceDate;
             //  $invoice->dueDate = $request->dueDate;
             $invoice->totalAmount = 0;
-            $invoice->taxAmount = 0;
+          
             $invoice->grandTotal = 0;
             $invoice->discount    = 0;
             $invoice->cGst = $request->cGst;

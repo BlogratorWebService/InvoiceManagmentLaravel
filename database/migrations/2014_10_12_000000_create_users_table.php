@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('firstName');
             $table->string('lastName');
-            $table->string('enterPriceName');
+            $table->string('enterPriceName')->nullable();
             $table->string('panNumber')->unique();
             $table->string(column: 'phoneNumber')->unique();
             $table->string('email')->unique();

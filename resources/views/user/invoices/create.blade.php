@@ -85,7 +85,7 @@
                                         </td>
                                         {{-- <td><input type="hidden" class="form-control tax" min="0" max="100" step="0.01"
                                                 value="{{ old('tax.' . $index,0) }}" oninput="maxHundread(this); calculateAmount(this)" name="tax[]"></td> --}}
-                                        <td class="amount">₹
+                                        <td class="amount" style="white-space: nowrap;">₹
                                             {{ old('amount.' . $index, number_format(old('quantity.' . $index, 0) * old('unitPrice.' . $index, 0) + old('quantity.' . $index, 0) * old('unitPrice.' . $index, 0) * (old('tax.' . $index, 0) / 100), 2)) }}
                                         </td>
                                         <td><button type="button" class="btn btn-danger btn-sm"
@@ -107,7 +107,7 @@
                                         </td>
                                         {{-- <td><input type="hideen" class="form-control tax" min="0" max="100" step="0.01"
                                                 oninput="maxHundread(this); calculateAmount(this)" name="tax[]"></td> --}}
-                                        <td class="amount">₹ 0.00 </td>
+                                        <td class="amount" style="white-space: nowrap;">₹ 0.00 </td>
                                         <td><button type="button" class="btn btn-danger btn-sm"
                                                 onclick="removeRow(this)">🗑</button></td>
                                     </tr>
@@ -131,8 +131,8 @@
                                 </select>
                             </div>
                         </div>
-                     
-                     
+
+
 
                         {{-- GST SECTION --}}
                         <div class="row mt-4">
@@ -140,24 +140,24 @@
                                 <label class="form-label">CGST</label>
                                 <div class="input-group">
                                     <input type="number" max="100" class="form-control" min="0"
-                                        value="0" id="cgst" value="{{ old('cGst') }}" oninput="maxHundread(this); calculateSubtotal()"
-                                        name="cGst">
+                                        value="0" id="cgst" value="{{ old('cGst') }}"
+                                        oninput="maxHundread(this); calculateSubtotal()" name="cGst">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">SGST</label>
                                 <div class="input-group">
                                     <input type="number" max="100" class="form-control" min="0"
-                                        value="0" id="sgst" value="{{ old('sGst') }}" oninput="maxHundread(this); calculateSubtotal()"
-                                        name="sGst">
+                                        value="0" id="sgst" value="{{ old('sGst') }}"
+                                        oninput="maxHundread(this); calculateSubtotal()" name="sGst">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">IGST</label>
                                 <div class="input-group">
                                     <input type="number" max="100" class="form-control" min="0"
-                                        value="0" id="igst" value="{{ old('iGst') }}" oninput="maxHundread(this); calculateSubtotal()"
-                                        name="iGst">
+                                        value="0" id="igst" value="{{ old('iGst') }}"
+                                        oninput="maxHundread(this); calculateSubtotal()" name="iGst">
                                 </div>
                             </div>
                             <div class="col-md-12 text-end mt-3">
@@ -224,9 +224,8 @@
             let row = element.closest('tr');
             let qty = parseFloat(row.querySelector('.qty').value) || 0;
             let unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
-            let taxElement = row.querySelector('.tax');
-            let tax = taxElement ? parseFloat(taxElement.value) || 0 : 0;
-            let amount = (qty * unitPrice) + ((qty * unitPrice) * (tax / 100));
+
+            let amount = (qty * unitPrice);
             row.querySelector('.amount').innerText = '₹ ' + amount.toFixed(2);
             calculateSubtotal();
         }
@@ -247,8 +246,13 @@
             } else if (discountType === 'fixed') {
                 subtotal -= discount;
             }
-
-            document.getElementById('subTotal').innerText = '₹ ' + subtotal.toFixed(2);
+            let cgst = parseFloat(document.getElementById('cgst').value) || 0;
+            let sgst = parseFloat(document.getElementById('sgst').value) || 0;
+            let igst = parseFloat(document.getElementById('igst').value) || 0;
+            let tax = cgst + sgst + igst;
+            console.log(subtotal);
+            let taxAmount = (subtotal * tax) / 100;
+            document.getElementById('subTotal').innerText = '₹ ' + ((subtotal + taxAmount).toFixed(2));
         }
 
         function maxHundread(input) {
@@ -277,7 +281,7 @@
         <td><input type="number" class="form-control unit-price" min="0" step="0.01" oninput="calculateAmount(this)" name="unitPrice[]"></td>
          <td><input type="number" class="form-control" min="0"
                                                 step="0.01"  name="hsnCode[]">
-        <td class="amount">₹ 0.00 </td>
+        <td class="amount" style="white-space: nowrap;">₹ 0.00 </td>
         <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">🗑</button></td>
     `;
         });

@@ -40,15 +40,22 @@ class AuthManager extends Controller
     }
     public function regSubmit(Request $request)
     {
+        $request->merge(['panNumber' => strtoupper($request->panNumber)]);
+
         // Validate the request data
-        $request->validate([
-            'firstName' => 'required|string|max:40',
-            'lastName' => 'required|string|max:40',
-            'phoneNumber' => 'required|numeric|digits:10|unique:users,phoneNumber',
-            'panNumber' => ['required', 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]$/', 'unique:users,panNumber'],
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        $request->validate(
+            [
+                'firstName' => 'required|string|max:40',
+                'lastName' => 'required|string|max:40',
+                'phoneNumber' => 'required|numeric|digits:10|unique:users,phoneNumber',
+                'panNumber' => ['required', 'regex:/^[A-Z]{5}[0-9]{4}[A-Z]$/', 'unique:users,panNumber'],
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8|confirmed',
+            ],
+            [
+                'panNumber.regex' => 'The PAN number must be in the format ABCDE1234F.'
+            ]
+        );
         try {
             $response = '{
             "pan": "ABCPV1234D",
@@ -70,11 +77,11 @@ class AuthManager extends Controller
             $response = json_decode($response);
             $allowedMatches = ['DIRECT_MATCH', 'GOOD_PARTIAL_MATCH'];
             //return $response;
-           if($response->pan_status != 'VALID'){
-               return back()->withErrors('PAN is not valid')->withInput();
-           }elseif(!in_array($response->name_match_result, $allowedMatches)){
-               return back()->withErrors('Name does not match with PAN')->withInput();
-           }
+            if ($response->pan_status != 'VALID') {
+                return back()->withErrors('PAN is not valid')->withInput();
+            } elseif (!in_array($response->name_match_result, $allowedMatches)) {
+                return back()->withErrors('Name does not match with PAN')->withInput();
+            }
 
 
             // Create a new user
@@ -88,8 +95,8 @@ class AuthManager extends Controller
             $user->save();
 
             // Log the user in
-           Auth::login($user);
-           
+            Auth::login($user);
+
             // Redirect to a specific route
             return redirect(route('dashboard'))->with('success', 'Registration successful!');
         } catch (\Exception $e) {

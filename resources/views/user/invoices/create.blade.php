@@ -24,7 +24,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Invoice #</label>
-                            <input type="text" class="form-control" value="KROKDZ" readonly name="invoiceNumber">
+                            <input type="text" class="form-control" value="{{ $invoiceNumber }}" readonly name="invoiceNumber">
                         </div>
                     </div>
 

@@ -18,20 +18,22 @@ class InvoiceManager extends Controller
         $entPriceName = str_replace(' ', '', $entPriceName);
         $entPriceName = strtoupper($entPriceName);
         $lstInvNum = Invoice::where([
-            'userId'=>$request->auth()->id,
-            'created_at'=>now()->format('Y-m-d')
-            ])->latest()->first();
-        if($lstInvNum){
+            'userId' => $request->user()->id,
+           
+        ])->whereDate( 'created_at' , date('Y-m-d'))->latest()->first();
+        if ($lstInvNum) {
+            
             $lstInvNum = $lstInvNum->invoiceNumber;
-            $lstInvNum = explode('-',$lstInvNum);
+            $lstInvNum = explode('-', $lstInvNum);
             $lstInvNum = $lstInvNum[1];
             $lstInvNum = (int)$lstInvNum + 1;
-            $lstInvNum = str_pad($lstInvNum,4,'0',STR_PAD_LEFT);
-            $data['invoiceNumber'] = substr($entPriceName,0,1).'-'.date('Ymd').($lstInvNum+1);
+            $lstInvNum = str_pad($lstInvNum, 4, '0', STR_PAD_LEFT);
+           
+            $data['invoiceNumber'] = substr($entPriceName, 0, 2) . '-' . $lstInvNum;
+        } else {
+            $data['invoiceNumber'] = substr($entPriceName, 0, 2) . '-' . date('ymd') . '0001';
         }
-        $data['invoiceNumber'] = substr($entPriceName,0,1).'-'.date('Ymd').'0001';
-
-        return view('user.invoices.create');
+        return view('user.invoices.create',$data);
     }
     public function store(Request $request)
     {

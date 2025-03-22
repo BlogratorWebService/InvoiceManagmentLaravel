@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 class InvoiceManager extends Controller
 {
     public function index(Request $request)
@@ -139,7 +140,8 @@ class InvoiceManager extends Controller
         DB::commit();
     }catch(\Exception $e){
         DB::rollBack();
-        return back()->with(['swtError' => 'Something went wrong']);
+        Log::error($e->getMessage());
+        return back()->withErrors('Something went wrong');
     }
         return back()->with(['swtSuccess' => 'Invoice created successfully']);
     }

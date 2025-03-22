@@ -17,6 +17,7 @@ class InvoiceManager extends Controller
         $entPriceName = auth()->user()->enterPriceName;
         $entPriceName = str_replace(' ', '', $entPriceName);
         $entPriceName = strtoupper($entPriceName);
+        $entPriceName = $entPriceName??'INV';
         $lstInvNum = Invoice::where([
             'userId' => $request->user()->id,
            

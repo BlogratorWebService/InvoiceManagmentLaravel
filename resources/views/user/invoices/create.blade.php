@@ -7,12 +7,12 @@
             </div>
             <div class="card-body">
                 @if ($errors->any())
-                <div class="bg-danger border border-red-400 text-white px-4 py-3 rounded relative mb-4" role="alert">
-                    <strong class="font-bold">Whoops!</strong>
-                    <span class="block sm:inline"> {{ $errors->first() }}</span>
-                    
-                </div>
-            @endif
+                    <div class="bg-danger border border-red-400 text-white px-4 py-3 rounded relative mb-4" role="alert">
+                        <strong class="font-bold">Whoops!</strong>
+                        <span class="block sm:inline"> {{ $errors->first() }}</span>
+
+                    </div>
+                @endif
                 <form method="POST" action="{{ route('invoice.store') }}">
                     @csrf
                     <div class="row mb-3">
@@ -20,12 +20,13 @@
                             <label class="form-label">Customer <span class="text-danger">*</span></label>
                             <select class="form-select select2" name="customer" id="customer">
                                 <option value="">Select Customer</option>
-                               
+
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Invoice #</label>
-                            <input type="text" class="form-control" value="{{ $invoiceNumber }}" readonly name="invoiceNumber">
+                            <input type="text" class="form-control" value="{{ $invoiceNumber }}" readonly
+                                name="invoiceNumber">
                         </div>
                     </div>
 
@@ -36,7 +37,8 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Due Date <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" value="{{ date('Y-m-d', strtotime('+1 day')) }}" name="dueDate">
+                            <input type="date" class="form-control" value="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                                name="dueDate">
                         </div>
                     </div>
 
@@ -60,7 +62,8 @@
                                     <th>Product <span class="text-danger">*</span></th>
                                     <th>Qty <span class="text-danger">*</span></th>
                                     <th>Unit Price <span class="text-danger">*</span></th>
-                                    <th>Tax (%)</th>
+                                    {{-- <th>Tax (%)</th> --}}
+                                    <th>HSN/SAC Code</th>
                                     <th>Amount <span class="text-danger">*</span></th>
                                     <th>Action</th>
                                 </tr>
@@ -69,30 +72,44 @@
                                 @foreach (old('product', []) as $index => $product)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td><input type="text" class="form-control" placeholder="Enter product" name="product[]" value="{{ $product }}"></td>
-                                        <td><input type="number" class="form-control qty" min="1" value="{{ old('quantity.' . $index, 1) }}"
+                                        <td><input type="text" class="form-control" placeholder="Enter product"
+                                                name="product[]" value="{{ $product }}"></td>
+                                        <td><input type="number" class="form-control qty" min="1"
+                                                value="{{ old('quantity.' . $index, 1) }}"
                                                 oninput="maxHundread(this); calculateAmount(this)" name="quantity[]"></td>
-                                        <td><input type="number" class="form-control unit-price" min="0" step="0.01"
-                                                value="{{ old('unitPrice.' . $index) }}" oninput="maxHundread(this); calculateAmount(this)" name="unitPrice[]"></td>
-                                        <td><input type="number" class="form-control tax" min="0" max="100" step="0.01"
-                                                value="{{ old('tax.' . $index) }}" oninput="maxHundread(this); calculateAmount(this)" name="tax[]"></td>
-                                        <td class="amount">₹ {{ old('amount.' . $index, number_format((old('quantity.' . $index, 0) * old('unitPrice.' . $index, 0)) + ((old('quantity.' . $index, 0) * old('unitPrice.' . $index, 0)) * (old('tax.' . $index, 0) / 100)), 2)) }}</td>
-                                        <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">🗑</button></td>
+                                        <td><input type="number" class="form-control unit-price" min="0"
+                                                step="0.01" value="{{ old('unitPrice.' . $index) }}"
+                                                oninput="maxHundread(this); calculateAmount(this)" name="unitPrice[]"></td>
+                                        <td><input type="number" class="form-control" min="0" step="0.01"
+                                                value="{{ old('hsnCode.' . $index) }}" name="hsnCode[]">
+                                        </td>
+                                        {{-- <td><input type="hidden" class="form-control tax" min="0" max="100" step="0.01"
+                                                value="{{ old('tax.' . $index,0) }}" oninput="maxHundread(this); calculateAmount(this)" name="tax[]"></td> --}}
+                                        <td class="amount">₹
+                                            {{ old('amount.' . $index, number_format(old('quantity.' . $index, 0) * old('unitPrice.' . $index, 0) + old('quantity.' . $index, 0) * old('unitPrice.' . $index, 0) * (old('tax.' . $index, 0) / 100), 2)) }}
+                                        </td>
+                                        <td><button type="button" class="btn btn-danger btn-sm"
+                                                onclick="removeRow(this)">🗑</button></td>
                                     </tr>
-                                 
                                 @endforeach
                                 @if (!old('product'))
                                     <tr>
                                         <td>1</td>
-                                        <td><input type="text" class="form-control" placeholder="Enter product" name="product[]"></td>
+                                        <td><input type="text" class="form-control" placeholder="Enter product"
+                                                name="product[]"></td>
                                         <td><input type="number" class="form-control qty" min="1" value="1"
                                                 oninput="maxHundread(this); calculateAmount(this)" name="quantity[]"></td>
-                                        <td><input type="number" class="form-control unit-price" min="0" step="0.01"
-                                                oninput="maxHundread(this); calculateAmount(this)" name="unitPrice[]"></td>
-                                        <td><input type="number" class="form-control tax" min="0" max="100" step="0.01"
-                                                oninput="maxHundread(this); calculateAmount(this)" name="tax[]"></td>
+                                        <td><input type="number" class="form-control unit-price" min="0"
+                                                step="0.01" oninput="maxHundread(this); calculateAmount(this)"
+                                                name="unitPrice[]"></td>
+                                        <td><input type="number" class="form-control" min="0" step="0.01"
+                                                value="" name="hsnCode[]">
+                                        </td>
+                                        {{-- <td><input type="hideen" class="form-control tax" min="0" max="100" step="0.01"
+                                                oninput="maxHundread(this); calculateAmount(this)" name="tax[]"></td> --}}
                                         <td class="amount">₹ 0.00 </td>
-                                        <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">🗑</button></td>
+                                        <td><button type="button" class="btn btn-danger btn-sm"
+                                                onclick="removeRow(this)">🗑</button></td>
                                     </tr>
                                 @endif
                             </tbody>
@@ -107,20 +124,50 @@
                             <div class="input-group">
                                 <input type="number" max="100" class="form-control" min="0" value="0"
                                     id="discount" oninput="maxHundread(this); calculateSubtotal()" name="discount">
-                                <select class="form-select" id="discountType" onchange="calculateSubtotal()" name="discountType">
+                                <select class="form-select" id="discountType" onchange="calculateSubtotal()"
+                                    name="discountType">
                                     <option value="percentage">Percentage</option>
                                     <option value="fixed">Fixed Amount</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-6 text-end">
-                            <h5>Sub Total: <span id="subTotal"> ₹0.00</span></h5>
-                        </div>
-                    </div>
+                     
+                     
 
-                    <div class="text-end mt-4">
-                        <button type="submit" class="btn btn-success">Save Invoice</button>
-                    </div>
+                        {{-- GST SECTION --}}
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <label class="form-label">CGST</label>
+                                <div class="input-group">
+                                    <input type="number" max="100" class="form-control" min="0"
+                                        value="0" id="cgst" oninput="maxHundread(this); calculateSubtotal()"
+                                        name="cgst">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">SGST</label>
+                                <div class="input-group">
+                                    <input type="number" max="100" class="form-control" min="0"
+                                        value="0" id="sgst" oninput="maxHundread(this); calculateSubtotal()"
+                                        name="sgst">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">IGST</label>
+                                <div class="input-group">
+                                    <input type="number" max="100" class="form-control" min="0"
+                                        value="0" id="igst" oninput="maxHundread(this); calculateSubtotal()"
+                                        name="igst">
+                                </div>
+                            </div>
+                            <div class="col-md-12 text-end mt-3">
+                                <h5>Sub Total: <span id="subTotal"> ₹0.00</span></h5>
+                            </div>
+                        </div>
+
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-success">Save Invoice</button>
+                        </div>
                 </form>
             </div>
         </div>
@@ -133,43 +180,43 @@
 @endpush
 @push('js')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-     
+
     <script>
         $(document).ready(function() {
             $('.select2').select2({
-            width: '100%', // Ensure full width
-            theme: 'bootstrap-5', // Use Bootstrap 5 theme (if applicable)
-            placeholder: "Select an option",
-            allowClear: true,
-            minimumInputLength: 1, // Minimum characters before triggering AJAX request
-            ajax: {
-                url: '/api/customers', // Your API endpoint
-                dataType: 'json',
-                delay: 250, // Delay in milliseconds before request is made
-                data: function(params) {
-                return {
-                    search: params.term, // Search term
-                    existing: $('#customer').val() // Include existing value if not null
-                };
-                },
-                processResults: function(data) {
-                // Parse the results into the format expected by Select2
-                return {
-                    results: $.map(data.items, function(item) {
-                    return {
-                        id: item.id,
-                        text: item.text
-                    };
-                    })
-                };
-                },
-                cache: true
-            }
+                width: '100%', // Ensure full width
+                theme: 'bootstrap-5', // Use Bootstrap 5 theme (if applicable)
+                placeholder: "Select an option",
+                allowClear: true,
+                minimumInputLength: 1, // Minimum characters before triggering AJAX request
+                ajax: {
+                    url: '/api/customers', // Your API endpoint
+                    dataType: 'json',
+                    delay: 250, // Delay in milliseconds before request is made
+                    data: function(params) {
+                        return {
+                            search: params.term, // Search term
+                            existing: $('#customer').val() // Include existing value if not null
+                        };
+                    },
+                    processResults: function(data) {
+                        // Parse the results into the format expected by Select2
+                        return {
+                            results: $.map(data.items, function(item) {
+                                return {
+                                    id: item.id,
+                                    text: item.text
+                                };
+                            })
+                        };
+                    },
+                    cache: true
+                }
             });
 
             // Trigger search if customer value is not null
             if ($('#customer').val()) {
-            $('.select2').trigger('select2:open');
+                $('.select2').trigger('select2:open');
             }
         });
 
@@ -177,7 +224,8 @@
             let row = element.closest('tr');
             let qty = parseFloat(row.querySelector('.qty').value) || 0;
             let unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
-            let tax = parseFloat(row.querySelector('.tax').value) || 0;
+            let taxElement = row.querySelector('.tax');
+            let tax = taxElement ? parseFloat(taxElement.value) || 0 : 0;
             let amount = (qty * unitPrice) + ((qty * unitPrice) * (tax / 100));
             row.querySelector('.amount').innerText = '₹ ' + amount.toFixed(2);
             calculateSubtotal();
@@ -227,7 +275,8 @@
         <td><input type="text" class="form-control" placeholder="Enter product" name="product[]"></td>
         <td><input type="number" class="form-control qty" min="1" value="1" oninput="maxHundread(this); calculateAmount(this)" name="quantity[]"></td>
         <td><input type="number" class="form-control unit-price" min="0" step="0.01" oninput="calculateAmount(this)" name="unitPrice[]"></td>
-        <td><input type="number" class="form-control tax" min="0" max="100" step="0.01" oninput="maxHundread(this); calculateAmount(this)" name="tax[]"></td>
+         <td><input type="number" class="form-control" min="0"
+                                                step="0.01"  name="hsnCode[]">
         <td class="amount">₹ 0.00 </td>
         <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">🗑</button></td>
     `;
@@ -244,10 +293,4 @@
             calculateSubtotal();
         }
     </script>
-    @if(old('product'))
-    <script>
-        
-        calculateSubtotal();
-    </script>
-    @endif
 @endpush

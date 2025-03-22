@@ -18,10 +18,13 @@ return new class extends Migration
             $table->unsignedBigInteger('customerId');
             $table->date('invoiceDate');
             $table->decimal('totalAmount', 10, 2);
-            $table->decimal('taxAmount', 10, 2)->default(0);
+            $table->decimal('cGst', 4, 2)->default(0);
+            $table->decimal('sGst', 4, 2)->default(0);
+            $table->decimal('iGst', 4, 2)->default(0);
             $table->decimal('discount', 10, 2)->default(0);
             $table->decimal('grandTotal', 10, 2);
-            $table->enum('status', ['pending', 'paid', 'cancelled'])->default('pending');
+            $table->enum('status', ['unpaid', 'paid', 'cancelled'])->default('unpaid');
+          
             $table->timestamps();
 
             $table->foreign('customerId')->references('id')->on('customers')->onDelete('cascade');

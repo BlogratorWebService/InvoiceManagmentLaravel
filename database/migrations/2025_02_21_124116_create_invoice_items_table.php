@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('productId')->nullable(); // Allow NULL for custom products
             $table->string('productName'); // Store custom product name if not in products table
             $table->integer('quantity');
+            $table->string('hsnCode')->nullable();
             $table->decimal('unitPrice', 10, 2);
             $table->decimal('totalPrice', 10, 2);
             $table->timestamps();

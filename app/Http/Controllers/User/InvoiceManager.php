@@ -67,10 +67,11 @@ class InvoiceManager extends Controller
             'product.*' => 'required|string',
             'quantity' => 'required|array|min:1',
             'quantity.*' => 'required|numeric|min:1',
+            'hsnCode' => 'required|array|min:1',
+            'hsnCode.*' => 'required|string',
             'unitPrice' => 'required|array|min:1',
             'unitPrice.*' => 'required|numeric|min:0',
-            'tax' => 'required|array|min:1',
-            'tax.*' => 'required|numeric|min:0|max:100',
+          
         ], [
           
             'product.required' => 'At least one product is required.',
@@ -82,13 +83,12 @@ class InvoiceManager extends Controller
             'quantity.*.min' => 'Each quantity must be at least 1.',
             'unitPrice.required' => 'At least one unit price is required.',
             'unitPrice.*.required' => 'Each unit price is required.',
+            'hsnCode.required' => 'At least one HSN code is required.',
+            'hsnCode.*.required' => 'Each HSN code is required.',
+            'hsnCode.*.string' => 'Each HSN code must be a string.',
             'unitPrice.*.numeric' => 'Each unit price must be a number.',
             'unitPrice.*.min' => 'Each unit price must be at least 0.',
-            'tax.required' => 'At least one tax value is required.',
-            'tax.*.required' => 'Each tax value is required.',
-            'tax.*.numeric' => 'Each tax value must be a number.',
-            'tax.*.min' => 'Each tax value must be at least 0.',
-            'tax.*.max' => 'Each tax value must not exceed 100.',
+           
         ]);
       try{
         DB::beginTransaction();
@@ -112,12 +112,13 @@ class InvoiceManager extends Controller
         foreach ($request->product as $index => $product) {
             $quantity = $request->quantity[$index];
             $unitPrice = $request->unitPrice[$index];
-            $tax = $request->tax[$index];
+            $tax = 0;
             $total = ($quantity * $unitPrice) + (($quantity * $unitPrice) * ($tax / 100));
 
             $item = new InvoiceItem();
             $item->invoiceId = $invoice->id;
             $item->productName = $product;
+            $item->hsnCode = $request->hsnCode[$index];
             $item->quantity = $quantity;
             $item->unitPrice = $unitPrice;
           //  $item->tax = $tax;
@@ -134,14 +135,14 @@ class InvoiceManager extends Controller
         }
 
         $invoice->grandTotal = $invoice->totalAmount - $invoice->discount + $invoice->taxAmount;
-        $invoice->taxAmount = $invoice->totalAmount * 0.1; // Example tax calculation (10%)
+        //$invoice->taxAmount = $invoice->totalAmount * 0.1;
         $invoice->grandTotal = $invoice->totalAmount + $invoice->taxAmount;
         $invoice->save();
         DB::commit();
     }catch(\Exception $e){
         DB::rollBack();
         Log::error($e->getMessage());
-        return back()->withErrors('Something went wrong');
+        return back()->withErrors('Something went wrong .'.$e->getMessage());
     }
         return back()->with(['swtSuccess' => 'Invoice created successfully']);
     }

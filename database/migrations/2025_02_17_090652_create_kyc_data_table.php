@@ -14,11 +14,13 @@ return new class extends Migration
         Schema::create('kyc_data', function (Blueprint $table) {
             $table->id();
             $table->foreignId('userId')->constrained('users');
-            $table->string('panNumber')->unique();
+            $table->string('panNumber')->nullable()->unique();
+            $table->string('GSTIN')->nullable()->unique();
             $table->string('state');
             $table->string('city');
             $table->string('fullAddress');
             $table->string('pinCode');
+            $table->string('GSTINApiLog')->nullable();
             $table->string('panApiLog')->nullable();
             $table->timestamps();
         });

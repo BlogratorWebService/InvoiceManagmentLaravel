@@ -15,7 +15,7 @@ class InvoiceManager extends Controller
     public function create(Request $request)
     {
         $entPriceName = auth()->user()->enterPriceName;
-        $entPriceName = $entPriceName??substr(auth()->user()->name, 0, 2);
+        $entPriceName = $entPriceName??substr(auth()->user()->firstName, 0, 2);
         
         $entPriceName = str_replace(' ', '', $entPriceName);
         $entPriceName = strtoupper($entPriceName);

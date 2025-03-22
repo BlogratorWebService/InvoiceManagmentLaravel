@@ -8,4 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Invoice extends Model
 {
     use HasFactory;
+    public function items()
+    {
+        return $this->hasMany(InvoiceItem::class, 'invoiceId');
+    }
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customerId');
+    }
 }

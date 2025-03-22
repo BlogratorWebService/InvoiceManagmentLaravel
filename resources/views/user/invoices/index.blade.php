@@ -12,7 +12,7 @@
                             <div
                                 class="d-flex justify-content-between align-items-center card-widget-1 border-end pb-4 pb-sm-0">
                                 <div>
-                                    <h4 class="mb-0">24</h4>
+                                    <h4 class="mb-0">{{ $clientsCount }}</h4>
                                     <p class="mb-0">Clients</p>
                                 </div>
                                 <div class="avatar me-sm-6 w-px-42 h-px-42">
@@ -27,7 +27,7 @@
                             <div
                                 class="d-flex justify-content-between align-items-center card-widget-2 border-end pb-4 pb-sm-0">
                                 <div>
-                                    <h4 class="mb-0">165</h4>
+                                    <h4 class="mb-0">{{ $invoiceStats->invoicesCount }}</h4>
                                     <p class="mb-0">Invoices</p>
                                 </div>
                                 <div class="avatar me-lg-6 w-px-42 h-px-42">
@@ -42,7 +42,7 @@
                             <div
                                 class="d-flex justify-content-between align-items-center border-end pb-4 pb-sm-0 card-widget-3">
                                 <div>
-                                    <h4 class="mb-0">$2.46k</h4>
+                                    <h4 class="mb-0">₹{{ $invoiceStats->totalPaid }}</h4>
                                     <p class="mb-0">Paid</p>
                                 </div>
                                 <div class="avatar me-sm-6 w-px-42 h-px-42">
@@ -55,7 +55,7 @@
                         <div class="col-sm-6 col-lg-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h4 class="mb-0">$876</h4>
+                                    <h4 class="mb-0">₹{{ $invoiceStats->totalUnpaid }}</h4>
                                     <p class="mb-0">Unpaid</p>
                                 </div>
                                 <div class="avatar w-px-42 h-px-42">
@@ -106,52 +106,62 @@
                 <table class="invoice-list-table table border-top">
                     <thead>
                         <tr>
-
                             <th>#</th>
-                          
                             <th>Client</th>
                             <th>Total</th>
-                            <th class="text-truncate">Issued Date</th>
+                            <th>Issued Date</th>
                             <th>Balance</th>
                             <th>Invoice Status</th>
                             <th class="cell-fit">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            
-                            <td>
-                                <div class="d-flex align-items-center">
-                                   
-                                    <div class="flex-1">
-                                        <h6 class="mb-0">John
-                                            Doe</h6>
-                                        <p class="mb-0">john
-                                            [email protected]</p>
+                        @foreach ($invoices as $invoice)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-1">
+                                            <h6 class="mb-0">{{ $invoice->customer->name }}</h6>
+                                            <p class="mb-0">{{ $invoice->customer->email }}</p>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td>$1,200</td>
-                            <td>12/12/2021</td>
-                            <td>$0</td>
-                            <td>
-                                <span class="badge bg-success">Paid</span>
-
-                            </td>
-                            <td>
-                                <div class="dropdown">
-                                    <button class="btn btn-icon btn-icon-only" type="button" data-bs-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">
-                                        <i class="icon-base bx bx-dots-horizontal-rounded"></i>
-                                    </button>
-                                    <div class="dropdown-menu dropdown-menu-end">
-                                        <a class="dropdown-item" href="#">View</a>
-                                        <a class="dropdown-item" href="#">Edit</a>
-                                        <a class="dropdown-item" href="#">Delete</a>
+                                </td>
+                                <td>₹{{ number_format($invoice->grandTotal, 2) }}</td>
+                                <td>{{ $invoice->invoiceDate }}</td>
+                                <td>₹{{ number_format($invoice->balance, 2)??0 }}</td>
+                                <td>
+                                    @if ($invoice->status === 'Paid')
+                                        <span class="badge bg-success">Paid</span>
+                                    @elseif ($invoice->status === 'Draft')
+                                        <span class="badge bg-secondary">Draft</span>
+                                    @elseif ($invoice->status === 'unpaid')
+                                        <span class="badge bg-warning">Unpaid</span>
+                                    @elseif ($invoice->status === 'Past Due')
+                                        <span class="badge bg-danger">Past Due</span>
+                                    @elseif ($invoice->status === 'Sent')
+                                        <span class="badge bg-info">Sent</span>
+                                    @elseif ($invoice->status === 'Downloaded')
+                                        <span class="badge bg-primary">Downloaded</span>
+                                    @else
+                                        <span class="badge bg-dark">{{ $invoice->status }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-icon btn-icon-only" type="button" data-bs-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                            <i class="icon-base bx bx-dots-horizontal-rounded"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-end">
+                                            <a class="dropdown-item" href="{{ route('invoice.show', $invoice->id) }}">View</a>
+                                            <a class="dropdown-item" href="{{ route('invoice.edit', $invoice->id) }}">Edit</a>
+                                          
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>

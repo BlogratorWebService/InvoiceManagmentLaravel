@@ -18,8 +18,9 @@
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Customer <span class="text-danger">*</span></label>
-                            <select class="form-select select2" name="customer">
+                            <select class="form-select select2" name="customer" id="customer">
                                 <option value="">Select Customer</option>
+                               
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -65,19 +66,35 @@
                                 </tr>
                             </thead>
                             <tbody id="invoiceItems">
-                                <tr>
-                                    <td>1</td>
-                                    <td><input type="text" class="form-control" placeholder="Enter product" name="product[]"></td>
-                                    <td><input type="number" class="form-control qty" min="1" value="1"
-                                            oninput="maxHundread(this); calculateAmount(this)" name="quantity[]"></td>
-                                    <td><input type="number" class="form-control unit-price" min="0" step="0.01"
-                                            oninput="maxHundread(this); calculateAmount(this)" name="unitPrice[]"></td>
-                                    <td><input type="number" class="form-control tax" min="0" max="100"
-                                            step="0.01" oninput="maxHundread(this); calculateAmount(this)" name="tax[]"></td>
-                                    <td class="amount">₹ 0.00 </td>
-                                    <td><button type="button" class="btn btn-danger btn-sm"
-                                            onclick="removeRow(this)">🗑</button></td>
-                                </tr>
+                                @foreach (old('product', []) as $index => $product)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td><input type="text" class="form-control" placeholder="Enter product" name="product[]" value="{{ $product }}"></td>
+                                        <td><input type="number" class="form-control qty" min="1" value="{{ old('quantity.' . $index, 1) }}"
+                                                oninput="maxHundread(this); calculateAmount(this)" name="quantity[]"></td>
+                                        <td><input type="number" class="form-control unit-price" min="0" step="0.01"
+                                                value="{{ old('unitPrice.' . $index) }}" oninput="maxHundread(this); calculateAmount(this)" name="unitPrice[]"></td>
+                                        <td><input type="number" class="form-control tax" min="0" max="100" step="0.01"
+                                                value="{{ old('tax.' . $index) }}" oninput="maxHundread(this); calculateAmount(this)" name="tax[]"></td>
+                                        <td class="amount">₹ {{ old('amount.' . $index, number_format((old('quantity.' . $index, 0) * old('unitPrice.' . $index, 0)) + ((old('quantity.' . $index, 0) * old('unitPrice.' . $index, 0)) * (old('tax.' . $index, 0) / 100)), 2)) }}</td>
+                                        <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">🗑</button></td>
+                                    </tr>
+                                 
+                                @endforeach
+                                @if (!old('product'))
+                                    <tr>
+                                        <td>1</td>
+                                        <td><input type="text" class="form-control" placeholder="Enter product" name="product[]"></td>
+                                        <td><input type="number" class="form-control qty" min="1" value="1"
+                                                oninput="maxHundread(this); calculateAmount(this)" name="quantity[]"></td>
+                                        <td><input type="number" class="form-control unit-price" min="0" step="0.01"
+                                                oninput="maxHundread(this); calculateAmount(this)" name="unitPrice[]"></td>
+                                        <td><input type="number" class="form-control tax" min="0" max="100" step="0.01"
+                                                oninput="maxHundread(this); calculateAmount(this)" name="tax[]"></td>
+                                        <td class="amount">₹ 0.00 </td>
+                                        <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">🗑</button></td>
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -116,33 +133,44 @@
 @endpush
 @push('js')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+     
     <script>
         $(document).ready(function() {
             $('.select2').select2({
-                width: '100%', // Ensure full width
-                theme: 'bootstrap-5', // Use Bootstrap 5 theme (if applicable)
-                placeholder: "Select an option",
-                allowClear: true,
-                minimumInputLength: 1, // Minimum characters before triggering AJAX request
-                ajax: {
-                    url: '/api/customers', // Your API endpoint
-                    dataType: 'json',
-                    delay: 250, // Delay in milliseconds before request is made
-                    processResults: function(data) {
-                        // Parse the results into the format expected by Select2
-                        return {
-                            results: $.map(data.items, function(item) {
-                                return {
-                                    id: item.id,
-                                    text: item.text
-                                };
-                            })
-                        };
-                    },
-                    cache: true
-                }
+            width: '100%', // Ensure full width
+            theme: 'bootstrap-5', // Use Bootstrap 5 theme (if applicable)
+            placeholder: "Select an option",
+            allowClear: true,
+            minimumInputLength: 1, // Minimum characters before triggering AJAX request
+            ajax: {
+                url: '/api/customers', // Your API endpoint
+                dataType: 'json',
+                delay: 250, // Delay in milliseconds before request is made
+                data: function(params) {
+                return {
+                    search: params.term, // Search term
+                    existing: $('#customer').val() // Include existing value if not null
+                };
+                },
+                processResults: function(data) {
+                // Parse the results into the format expected by Select2
+                return {
+                    results: $.map(data.items, function(item) {
+                    return {
+                        id: item.id,
+                        text: item.text
+                    };
+                    })
+                };
+                },
+                cache: true
+            }
             });
+
+            // Trigger search if customer value is not null
+            if ($('#customer').val()) {
+            $('.select2').trigger('select2:open');
+            }
         });
 
         function calculateAmount(element) {
@@ -216,4 +244,10 @@
             calculateSubtotal();
         }
     </script>
+    @if(old('product'))
+    <script>
+        
+        calculateSubtotal();
+    </script>
+    @endif
 @endpush

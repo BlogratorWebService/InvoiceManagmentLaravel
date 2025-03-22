@@ -17,7 +17,7 @@ use App\Http\Controllers\User\Dashboard;
 |
 */
 Route::get('/',function(){
-    return view('welcome');
+    return redirect()->route('loginPage');
 });
 
 Route::middleware('guest')->controller(AuthManager::class)->group(function () {

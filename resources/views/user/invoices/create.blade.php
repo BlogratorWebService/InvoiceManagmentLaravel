@@ -140,24 +140,24 @@
                                 <label class="form-label">CGST</label>
                                 <div class="input-group">
                                     <input type="number" max="100" class="form-control" min="0"
-                                        value="0" id="cgst" oninput="maxHundread(this); calculateSubtotal()"
-                                        name="cgst">
+                                        value="0" id="cgst" value="{{ old('cGst') }}" oninput="maxHundread(this); calculateSubtotal()"
+                                        name="cGst">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">SGST</label>
                                 <div class="input-group">
                                     <input type="number" max="100" class="form-control" min="0"
-                                        value="0" id="sgst" oninput="maxHundread(this); calculateSubtotal()"
-                                        name="sgst">
+                                        value="0" id="sgst" value="{{ old('sGst') }}" oninput="maxHundread(this); calculateSubtotal()"
+                                        name="sGst">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">IGST</label>
                                 <div class="input-group">
                                     <input type="number" max="100" class="form-control" min="0"
-                                        value="0" id="igst" oninput="maxHundread(this); calculateSubtotal()"
-                                        name="igst">
+                                        value="0" id="igst" value="{{ old('iGst') }}" oninput="maxHundread(this); calculateSubtotal()"
+                                        name="iGst">
                                 </div>
                             </div>
                             <div class="col-md-12 text-end mt-3">

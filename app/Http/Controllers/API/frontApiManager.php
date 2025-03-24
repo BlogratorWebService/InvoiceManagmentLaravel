@@ -14,7 +14,7 @@ class frontApiManager extends Controller
         $search = $request->input('search');
 
         $items = Customers::where('name', 'LIKE', "%$search%")
-            ->select('id', DB::raw('concat(name," ", "(",email,")") as text')) // Select 'id' and 'text' for Select2
+            ->select('id', DB::raw('concat(name," ", "(",email,")") as text'),'gstNumber') // Select 'id' and 'text' for Select2
             ->get();
     
         return response()->json(['items' => $items]);

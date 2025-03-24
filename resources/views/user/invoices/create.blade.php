@@ -65,6 +65,10 @@
                                 <option value="paid">Paid</option>
                             </select>
                         </div>
+                        <div class="col-md-6" id="gstInDiv" style="display: none;">
+                            <label class="form-label">GSTIN Number <span class="text-danger"></span></label>
+                            <input type="text" class="form-control" value="" id="gstIn" readonly>
+                        </div>
 
                     </div>
 
@@ -247,14 +251,25 @@
                             results: $.map(data.items, function(item) {
                                 return {
                                     id: item.id,
-                                    text: item.text
+                                    text: item.text,
+                                    gstNumber: item.gstNumber
                                 };
                             })
                         };
                     },
                     cache: true
                 }
-            });
+            }).on('select2:select', function(e) {
+                let selectedData = e.params.data;
+                if (selectedData.gstNumber == null) {
+                    $('#gstInDiv').hide();
+                    $('#gstIn').val('');
+                    return;
+                }
+                $('#gstInDiv').show();
+                $('#gstIn').val(selectedData.gstNumber);
+
+            });;
 
             function callProdSelect2() {
                 $('.select2-product').select2({
@@ -390,8 +405,8 @@
                 row.parentNode.removeChild(row);
                 calculateSubtotal();
             }
-            @if(old('product'))
-            calculateSubtotal();
+            @if (old('product'))
+                calculateSubtotal();
             @endif
         });
     </script>

@@ -1,4 +1,15 @@
 @extends('user.layouts.default')
+@push('css')
+    <style>
+        .select2-container--bootstrap-5 .select2-selection__rendered {
+            padding-right: 2rem !important;
+            /* or 24px */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+@endpush
 @section('content')
     <div class="container mt-4">
         <div class="card shadow-sm">
@@ -20,7 +31,11 @@
                             <label class="form-label">Customer <span class="text-danger">*</span></label>
                             <select class="form-select select2" name="customer" id="customer">
                                 <option value="">Select Customer</option>
-
+                                @if (old('customer'))
+                                    <option value="{{ old('customer') }}" selected>
+                                        {{ \App\Models\Customer::find(old('customer'))?->name ?? 'Selected Customer' }}
+                                    </option>
+                                @endif
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -72,8 +87,14 @@
                                 @foreach (old('product', []) as $index => $product)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td><input type="text" class="form-control" placeholder="Enter product"
-                                                name="product[]" value="{{ $product }}"></td>
+                                        <td> <select class="form-select select2 select2-product" name="product[]">
+
+                                                <option value="{{ $product }}" selected>
+                                                    {{ \App\Models\Product::find($product)?->name ?? 'Selected Product' }}
+                                                </option>
+
+                                            </select>
+                                        </td>
                                         <td><input type="number" class="form-control qty" min="1"
                                                 value="{{ old('quantity.' . $index, 1) }}"
                                                 oninput="maxHundread(this); calculateAmount(this)" name="quantity[]"></td>
@@ -81,7 +102,7 @@
                                                 step="0.01" value="{{ old('unitPrice.' . $index) }}"
                                                 oninput="maxHundread(this); calculateAmount(this)" name="unitPrice[]"></td>
                                         <td><input type="number" class="form-control" min="0" step="0.01"
-                                                value="{{ old('hsnCode.' . $index) }}" name="hsnCode[]">
+                                                value="{{ old('hsnCode.' . $index) }}" name="hsnCode[]" readonly>
                                         </td>
                                         {{-- <td><input type="hidden" class="form-control tax" min="0" max="100" step="0.01"
                                                 value="{{ old('tax.' . $index,0) }}" oninput="maxHundread(this); calculateAmount(this)" name="tax[]"></td> --}}
@@ -95,15 +116,18 @@
                                 @if (!old('product'))
                                     <tr>
                                         <td>1</td>
-                                        <td><input type="text" class="form-control" placeholder="Enter product"
-                                                name="product[]"></td>
+                                        <td>
+                                            <select class="form-select select2 select2-product" name="product[]"
+                                                style="width: 100%;">
+                                            </select>
+                                        </td>
                                         <td><input type="number" class="form-control qty" min="1" value="1"
                                                 oninput="maxHundread(this); calculateAmount(this)" name="quantity[]"></td>
                                         <td><input type="number" class="form-control unit-price" min="0"
-                                                step="0.01" oninput="maxHundread(this); calculateAmount(this)"
-                                                name="unitPrice[]"></td>
+                                                oninput="maxHundread(this); calculateAmount(this)" name="unitPrice[]">
+                                        </td>
                                         <td><input type="number" class="form-control" min="0" step="0.01"
-                                                value="" name="hsnCode[]">
+                                                value="" name="hsnCode[]" readonly>
                                         </td>
                                         {{-- <td><input type="hideen" class="form-control tax" min="0" max="100" step="0.01"
                                                 oninput="maxHundread(this); calculateAmount(this)" name="tax[]"></td> --}}
@@ -140,7 +164,7 @@
                                 <label class="form-label">CGST</label>
                                 <div class="input-group">
                                     <input type="number" max="100" class="form-control" min="0"
-                                        value="0" id="cgst" value="{{ old('cGst') }}"
+                                        id="cgst" value="{{ old('cGst', 0) }}"
                                         oninput="maxHundread(this); calculateSubtotal()" name="cGst">
                                 </div>
                             </div>
@@ -148,7 +172,7 @@
                                 <label class="form-label">SGST</label>
                                 <div class="input-group">
                                     <input type="number" max="100" class="form-control" min="0"
-                                        value="0" id="sgst" value="{{ old('sGst') }}"
+                                        id="sgst" value="{{ old('sGst', 0) }}"
                                         oninput="maxHundread(this); calculateSubtotal()" name="sGst">
                                 </div>
                             </div>
@@ -156,7 +180,7 @@
                                 <label class="form-label">IGST</label>
                                 <div class="input-group">
                                     <input type="number" max="100" class="form-control" min="0"
-                                        value="0" id="igst" value="{{ old('iGst') }}"
+                                        id="igst" value="{{ old('iGst', 0) }}"
                                         oninput="maxHundread(this); calculateSubtotal()" name="iGst">
                                 </div>
                             </div>
@@ -183,6 +207,7 @@
 
     <script>
         $(document).ready(function() {
+
             invoiceForm = document.getElementById('invoiceForm');
             invoiceForm.addEventListener('submit', function(event) {
                 event.preventDefault(); // Prevent default form submission
@@ -200,7 +225,7 @@
                     }
                 });
             });
-            $('.select2').select2({
+            $('#customer').select2({
                 width: '100%', // Ensure full width
                 theme: 'bootstrap-5', // Use Bootstrap 5 theme (if applicable)
                 placeholder: "Select an option",
@@ -231,87 +256,143 @@
                 }
             });
 
-            // Trigger search if customer value is not null
-            if ($('#customer').val()) {
-                $('.select2').trigger('select2:open');
+            function callProdSelect2() {
+                $('.select2-product').select2({
+                    width: '100%', // Ensure full width
+                    theme: 'bootstrap-5', // Use Bootstrap 5 theme (if applicable)
+                    placeholder: "Select an option",
+                    allowClear: true,
+                    minimumInputLength: 1, // Minimum characters before triggering AJAX request
+                    ajax: {
+                        url: '/api/products', // Your API endpoint
+                        dataType: 'json',
+                        delay: 250, // Delay in milliseconds before request is made
+                        data: function(params) {
+                            return {
+                                search: params.term // Search term
+                                // existing: $('#customer').val() // Include existing value if not null
+                            };
+                        },
+                        processResults: function(data) {
+                            // Parse the results into the format expected by Select2
+                            return {
+                                results: $.map(data.items, function(item) {
+                                    return {
+                                        id: item.id,
+                                        text: item.text,
+                                        price: item.price, // ✅ Product Price
+                                        hsn: item.hsnCode // ✅ HSN Code
+                                    };
+                                })
+                            };
+                        },
+                        cache: true
+                    }
+                }).on('select2:select', function(e) {
+                    let selectedData = e.params.data;
+                    let row = $(this).closest('tr');
+                    console.log(selectedData);
+                    row.find('input[name="unitPrice[]"]').val(selectedData.price); // ✅ Set price
+                    row.find('input[name="hsnCode[]"]').val(selectedData.hsn); // ✅ Set HSN code
+
+                    calculateAmount(row.find('.unit-price')[0]); // ✅ Recalculate amount
+                });
             }
-        });
+            callProdSelect2();
 
-        function calculateAmount(element) {
-            let row = element.closest('tr');
-            let qty = parseFloat(row.querySelector('.qty').value) || 0;
-            let unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
+            // Trigger search if product value is not null
 
-            let amount = (qty * unitPrice);
-            row.querySelector('.amount').innerText = '₹ ' + amount.toFixed(2);
-            calculateSubtotal();
-        }
 
-        function calculateSubtotal() {
-            let rows = document.querySelectorAll('#invoiceItems tr');
-            let subtotal = 0;
-            rows.forEach(row => {
-                let amount = parseFloat(row.querySelector('.amount').innerText.replace('₹', '').trim()) || 0;
-                subtotal += amount;
+
+
+            // Trigger search if customer value is not null
+
+
+
+            window.calculateAmount = function(element) {
+                let row = element.closest('tr');
+                let qty = parseFloat(row.querySelector('.qty').value) || 0;
+                let unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
+
+                let amount = (qty * unitPrice);
+                row.querySelector('.amount').innerText = '₹ ' + amount.toFixed(2);
+                calculateSubtotal();
+            }
+
+            window.calculateSubtotal = function() {
+                let rows = document.querySelectorAll('#invoiceItems tr');
+                let subtotal = 0;
+                rows.forEach(row => {
+                    let amount = parseFloat(row.querySelector('.amount').innerText.replace('₹', '')
+                        .trim()) || 0;
+                    subtotal += amount;
+                });
+
+                let discount = parseFloat(document.getElementById('discount').value) || 0;
+                let discountType = document.getElementById('discountType').value;
+
+                if (discountType === 'percentage') {
+                    subtotal -= (subtotal * (discount / 100));
+                } else if (discountType === 'fixed') {
+                    subtotal -= discount;
+                }
+                let cgst = parseFloat(document.getElementById('cgst').value) || 0;
+                let sgst = parseFloat(document.getElementById('sgst').value) || 0;
+                let igst = parseFloat(document.getElementById('igst').value) || 0;
+                let tax = cgst + sgst + igst;
+                console.log(subtotal);
+                let taxAmount = (subtotal * tax) / 100;
+                document.getElementById('subTotal').innerText = '₹ ' + ((subtotal + taxAmount).toFixed(2));
+            }
+
+            window.maxHundread = function(input) {
+                if (input.name == 'unitPrice[]') {
+                    if (input.value > 100000) {
+                        input.value = 100000;
+                    }
+                } else {
+                    if (input.value > 100) {
+                        input.value = 100;
+                    }
+                }
+                if (input.value < 0) {
+                    input.value = 0;
+                }
+            }
+
+
+
+            document.getElementById("addRow").addEventListener("click", function() {
+
+                let table = document.getElementById("invoiceItems");
+                let rowCount = table.rows.length;
+                let row = table.insertRow();
+                row.innerHTML = `
+                    <td>${rowCount + 1}</td>
+                    <td> <select class="form-select select2 select2-product" name="product[]">
+                                                        </select></td>
+                    <td><input type="number" class="form-control qty" min="1" value="1" oninput="maxHundread(this); calculateAmount(this)" name="quantity[]"></td>
+                    <td><input type="number" class="form-control unit-price" min="0" step="0.01" oninput="calculateAmount(this)" name="unitPrice[]"></td>
+                    <td><input type="number" class="form-control" min="0"
+                                                            step="0.01"  name="hsnCode[]" readonly>
+                    <td class="amount" style="white-space: nowrap;">₹ 0.00 </td>
+                    <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">🗑</button></td>
+                `;
+                callProdSelect2();
             });
 
-            let discount = parseFloat(document.getElementById('discount').value) || 0;
-            let discountType = document.getElementById('discountType').value;
-
-            if (discountType === 'percentage') {
-                subtotal -= (subtotal * (discount / 100));
-            } else if (discountType === 'fixed') {
-                subtotal -= discount;
+            window.removeRow = function(button) {
+                let table = document.getElementById("invoiceItems");
+                console.log(table.rows.length);
+                if (table.rows.length == 1)
+                    return false;
+                let row = button.closest("tr");
+                row.parentNode.removeChild(row);
+                calculateSubtotal();
             }
-            let cgst = parseFloat(document.getElementById('cgst').value) || 0;
-            let sgst = parseFloat(document.getElementById('sgst').value) || 0;
-            let igst = parseFloat(document.getElementById('igst').value) || 0;
-            let tax = cgst + sgst + igst;
-            console.log(subtotal);
-            let taxAmount = (subtotal * tax) / 100;
-            document.getElementById('subTotal').innerText = '₹ ' + ((subtotal + taxAmount).toFixed(2));
-        }
-
-        function maxHundread(input) {
-            if (input.name == 'unitPrice[]') {
-                if (input.value > 100000) {
-                    input.value = 100000;
-                }
-            } else {
-                if (input.value > 100) {
-                    input.value = 100;
-                }
-            }
-            if (input.value < 0) {
-                input.value = 0;
-            }
-        }
-
-        document.getElementById("addRow").addEventListener("click", function() {
-            let table = document.getElementById("invoiceItems");
-            let rowCount = table.rows.length;
-            let row = table.insertRow();
-            row.innerHTML = `
-        <td>${rowCount + 1}</td>
-        <td><input type="text" class="form-control" placeholder="Enter product" name="product[]"></td>
-        <td><input type="number" class="form-control qty" min="1" value="1" oninput="maxHundread(this); calculateAmount(this)" name="quantity[]"></td>
-        <td><input type="number" class="form-control unit-price" min="0" step="0.01" oninput="calculateAmount(this)" name="unitPrice[]"></td>
-         <td><input type="number" class="form-control" min="0"
-                                                step="0.01"  name="hsnCode[]">
-        <td class="amount" style="white-space: nowrap;">₹ 0.00 </td>
-        <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">🗑</button></td>
-    `;
-        });
-
-        function removeRow(button) {
-            let table = document.getElementById("invoiceItems");
-
-            console.log(table.rows.length);
-            if (table.rows.length == 1)
-                return false;
-            let row = button.closest("tr");
-            row.parentNode.removeChild(row);
+            @if(old('product'))
             calculateSubtotal();
-        }
+            @endif
+        });
     </script>
 @endpush

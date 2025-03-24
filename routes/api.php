@@ -18,4 +18,5 @@ Route::middleware('auth:sanctum')->group(function () {
    
 });
 Route::get('/customers', [frontApiManager::class,'getCustomers']);
+Route::get('/products', [frontApiManager::class,'getProducts']);
 

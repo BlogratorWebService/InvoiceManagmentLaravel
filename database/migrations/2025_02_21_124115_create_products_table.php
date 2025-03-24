@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('userId')->constrained('users');
             $table->string('name');
-
+            
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2);
             $table->string('hsnCode')->nullable();

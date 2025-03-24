@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
@@ -54,6 +55,7 @@ class InvoiceManager extends Controller
     }
     public function store(Request $request)
     {
+       // return $request->input();
         //validate the request
         $request->validate([
             'customer' => 'required|exists:customers,id',
@@ -125,7 +127,9 @@ class InvoiceManager extends Controller
 
                 $item = new InvoiceItem();
                 $item->invoiceId = $invoice->id;
-                $item->productName = $product;
+
+                $item->productName = Product::find($product)->name;
+                $item->productId = $product;
                 $item->hsnCode = $request->hsnCode[$index];
                 $item->quantity = $quantity;
                 $item->unitPrice = $unitPrice;

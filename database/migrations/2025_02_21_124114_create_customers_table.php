@@ -19,7 +19,13 @@ return new class extends Migration
             
             $table->string('email')->unique();
             $table->string('phone')->nullable();
-            $table->text('address')->nullable();
+            $table->text('addressLine1')->nullable();
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
+            $table->string('zip')->nullable();
+            $table->string('gstNumber')->nullable();
+
+
             $table->timestamps();
         });
     }
